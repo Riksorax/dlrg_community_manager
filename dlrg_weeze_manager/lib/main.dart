@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'features/presentation/general/settings/settings.dart';
 import 'features/presentation/indoor_pool/entrance.dart';
+import 'features/presentation/indoor_pool/over_view.dart';
 import 'features/presentation/login_logout/login-screen.dart';
 import 'features/presentation/member_cards/member_cards.dart';
 import 'features/shared/presentation/theme/theme.dart';
@@ -67,6 +68,8 @@ class MyApp extends ConsumerWidget {
             return MaterialPageRoute(builder: (context) => const MemberCards());
           case '/entrance':
             return MaterialPageRoute(builder: (context) => const Entrance());
+          case '/over_view':
+            return MaterialPageRoute(builder: (context) => const OverView());
           case '/settings':
             return MaterialPageRoute(builder: (context) => const Settings());
           default:
@@ -105,6 +108,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 2:
         Navigator.pushNamed(context, '/entrance');
       case 3:
+        Navigator.pushNamed(context, '/over_view');
+      case 4:
         Navigator.pushNamed(context, '/settings');
     }
   }
