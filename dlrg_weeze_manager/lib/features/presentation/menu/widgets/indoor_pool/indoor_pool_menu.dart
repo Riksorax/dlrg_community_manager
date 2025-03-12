@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../indoor_pool/entrance.dart';
+import '../../../indoor_pool/over_view.dart';
 
 class IndoorPoolMenu extends StatelessWidget {
   final Function(int) onItemTapped;
@@ -29,9 +30,16 @@ class IndoorPoolMenu extends StatelessWidget {
           leading: Icon(Icons.timer),
           title: Text("Training"),
         ),
-        const ListTile(
+        ListTile(
           leading: Icon(Icons.list),
           title: Text("Übersicht"),
+          onTap: () {
+            Navigator.pop(context); // Schließt das Drawer
+            Navigator.pushReplacementNamed(
+              context,
+              OverView.routeName,
+            );
+          },
         ),
       ],
     );

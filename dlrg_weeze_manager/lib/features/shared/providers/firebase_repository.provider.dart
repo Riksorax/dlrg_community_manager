@@ -153,7 +153,7 @@ Future<void> _deleteMember(String memberNumber) async {
 }
 
 @riverpod
-Future<List<Member>> getAllMembersRepo(GetAllMembersRepoRef ref) async {
+Future<List<Member>> getAllMembersRepo(Ref ref) async {
   try {
     var members = await _getAllMembers();
     return members;
