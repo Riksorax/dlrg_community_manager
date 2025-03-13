@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: develop # Die Umgebung, die verwendet werden soll.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
