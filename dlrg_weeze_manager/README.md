@@ -55,4 +55,4 @@ Dieses Projekt ist unter der [MIT-Lizenz](https://opensource.org/licenses/MIT) l
 
 ## Kontakt
 
-Bei Fragen oder Anregungen können Sie sich gerne an [Ihr Kontaktinformationen] wenden.
+Bei Fragen oder Anregungen können Sie sich gerne an [riksorax25@gmail.com] wenden.
