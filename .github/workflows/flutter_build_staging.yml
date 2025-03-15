@@ -1,0 +1,43 @@
+name: Build Flutter App Bundle
+
+on:
+  push:
+    branches:
+      - staging
+  pull_request:
+    branches:
+      - staging
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: staging # Die Umgebung, die verwendet werden soll.
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.4' # Oder deine bevorzugte Flutter-Version
+
+      - name: Change directory to project root and get dependencies
+        run: cd dlrg_weeze_manager && flutter pub get
+
+      - name: Check Flutter Doctor
+        run: flutter doctor -v
+
+      - name: Build App Bundle
+        run: flutter build appbundle --release
+        working-directory: dlrg_weeze_manager
+
+      - name: Upload App Bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: DLRG Community Manager.aab
+          path: dlrg_weeze_manager/build/app/outputs/bundle/release/app-release.aab
