@@ -1,0 +1,2 @@
+D:/Projekte/dlrg_weeze_manager/dlrg_weeze_manager/android/app/.cxx/RelWithDebInfo/443z735w/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/Projekte/dlrg_weeze_manager/dlrg_weeze_manager/android/app/.cxx/RelWithDebInfo/443z735w/armeabi-v7a/CMakeFiles/rebuild_cache.dir
