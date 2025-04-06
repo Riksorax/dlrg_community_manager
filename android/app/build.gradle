@@ -11,15 +11,16 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
-def keystoreProperties = new java.util.Properties()
-def keystorePropertiesFile = rootProject.file("key.properties")
+// Lade Release-Keystore-Properties, falls die Datei existiert
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties") // Bleibt im Projekt-Root
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
-
 android {
-    namespace = "com.example.android"
+    // Setze einen eindeutigen Namespace für deine App
+    namespace = "app.dlrg_cm.dlrgcommunitymanager" // <- ÄNDERN!
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -32,47 +33,45 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8
     }
 
+    signingConfigs {
+        // KEINE explizite Debug-Konfiguration mehr nötig! Gradle macht das automatisch.
+
+        release {
+            // Lese Konfiguration aus key.properties, nur wenn die Datei existiert
+            if (keystorePropertiesFile.exists()) {
+                storeFile file(keystoreProperties['releaseStoreFile']) // Eindeutiger Name!
+                storePassword keystoreProperties['releaseStorePassword'] // Eindeutiger Name!
+                keyAlias keystoreProperties['releaseKeyAlias']         // Eindeutiger Name!
+                keyPassword keystoreProperties['releaseKeyPassword']     // Eindeutiger Name!
+            } else {
+                // Optional: Fallback oder Fehlermeldung, falls key.properties für Release-Build fehlt
+                // buildConfigField "boolean", "SIGNED_WITH_RELEASE_KEY", "false" // Beispiel
+                println("Warning: key.properties not found for release signing!")
+            }
+        }
+    }
+
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "app.dlrg_cm.dlrgcommunitymanager"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = flutter.minSdkVersion // Nur diese Zeile für minSdk
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        minSdkVersion 23
-    }
-
-    signingConfigs {
-        debug {
-            storePassword keystoreProperties["storePassword"]
-            keyAlias keystoreProperties["keyAlias"]
-            keyPassword keystoreProperties["keyPassword"]
-            storeFile file(keystoreProperties["storeFile"])
-        }
-        create("release") {
-            keyAlias = keystoreProperties["keyAlias"]
-            keyPassword = keystoreProperties["keyPassword"]
-            storePassword keystoreProperties["storePassword"]
-            storeFile file(keystoreProperties["storeFile"])
-            if(keystoreProperties["storeFile"] != null) {  // Hinzugefügt: Groovy-Check
-                storeFile = file(keystoreProperties["storeFile"])
-            }            storePassword = keystoreProperties["storePassword"]
-        }
+        // minSdkVersion 23 // <- Diese Zeile entfernen (redundant)
     }
 
     buildTypes {
         debug {
-            // Debug-spezifische Einstellungen
-            signingConfig signingConfigs.debug
+            // KEINE signingConfig hier nötig! Wird automatisch signiert.
             debuggable true
         }
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            // WICHTIG: Nutze die release signingConfig!
+            signingConfig signingConfigs.release // <- GEÄNDERT!
+            // Behalte Proguard / R8 bei
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Optional: Weitere Release-Optimierungen
+            // shrinkResources true // Z.B. ungenutzte Resourcen entfernen
         }
     }
 }
