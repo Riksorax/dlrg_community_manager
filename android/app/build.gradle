@@ -45,9 +45,17 @@ android {
     }
 
     signingConfigs {
+        debug {
+            storePassword keystoreProperties["storePassword"]
+            keyAlias keystoreProperties["keyAlias"]
+            keyPassword keystoreProperties["keyPassword"]
+            storeFile file(keystoreProperties["storeFile"])
+        }
         create("release") {
             keyAlias = keystoreProperties["keyAlias"]
             keyPassword = keystoreProperties["keyPassword"]
+            storePassword keystoreProperties["storePassword"]
+            storeFile file(keystoreProperties["storeFile"])
             if(keystoreProperties["storeFile"] != null) {  // Hinzugefügt: Groovy-Check
                 storeFile = file(keystoreProperties["storeFile"])
             }            storePassword = keystoreProperties["storePassword"]
@@ -55,10 +63,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Debug-spezifische Einstellungen
+            signingConfig signingConfigs.debug
+            debuggable true
+        }
         release {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
