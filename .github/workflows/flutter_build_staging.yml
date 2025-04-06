@@ -43,7 +43,7 @@ jobs:
       - name: Decode Release Keystore
         run: |
           echo "Decoding keystore..."
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > dlrg_weeze_manager/release.jks
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > dlrg-community-manager/release.jks
           echo "Keystore decoded successfully."
         # WICHTIG: Ersetze ANDROID_KEYSTORE_BASE64 durch den exakten Namen deines Secrets, falls anders.
 
