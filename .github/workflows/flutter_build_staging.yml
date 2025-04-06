@@ -1,4 +1,4 @@
-name: Build Flutter App Bundle
+name: Build Flutter Release App Bundle
 
 on:
   push:
@@ -11,50 +11,65 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: staging # Die Umgebung, die verwendet werden soll.
+    # Umgebung kann beibehalten werden, wenn Secrets dort definiert sind
+    # environment: staging
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Neueste Version verwenden
 
       - name: Set up Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4 # Neueste Version verwenden
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '17' # Sicherstellen, dass dies für Android Gradle Plugin passt
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4' # Oder deine bevorzugte Flutter-Version
+          channel: 'stable' # Empfohlen: stabilen Channel verwenden oder spezifische Version wie zuvor
+          # flutter-version: '3.27.4' # Oder deine bevorzugte Flutter-Version
 
       - name: Change directory to project root and get dependencies
-        run: cd dlrg_weeze_manager && flutter pub get
+        # WICHTIG: Stelle sicher, dass 'dlrg-community-manager' der korrekte Name deines Flutter-Projektordners im Repo ist
+        run: cd dlrg-community-manager && flutter pub get
 
       - name: Check Flutter Doctor
+        # Führe doctor im Projektverzeichnis aus, um sicherzustellen, dass alles passt
         run: flutter doctor -v
+        working-directory: dlrg-community-manager
 
-      # 🔹 Keystore entschlüsseln und speichern
-      - name: Decode Keystore
+      # 🔹 Release Keystore entschlüsseln und im Projekt-Root speichern
+      - name: Decode Release Keystore
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > dlrg_weeze_manager/android/app/keystore.jks
+          echo "Decoding keystore..."
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > dlrg_weeze_manager/release.jks
+          echo "Keystore decoded successfully."
+        # WICHTIG: Ersetze ANDROID_KEYSTORE_BASE64 durch den exakten Namen deines Secrets, falls anders.
 
-      # 🔹 `key.properties` Datei erstellen
-      - name: Create key.properties
+      # 🔹 `key.properties` Datei im Projekt-Root erstellen (mit korrekten Property-Namen)
+      - name: Create key.properties for Release
         run: |
-          echo "storeFile=keystore.jks" > dlrg_weeze_manager/android/key.properties
-          echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> dlrg_weeze_manager/android/key.properties
-          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> dlrg_weeze_manager/android/key.properties
-          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> dlrg_weeze_manager/android/key.properties
+          echo "Creating key.properties..."
+          # Schreibe in das Projektverzeichnis (dlrg-community-manager)
+          echo "releaseStoreFile=release.jks" > dlrg-community-manager/key.properties
+          echo "releaseStorePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> dlrg-community-manager/key.properties
+          echo "releaseKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> dlrg-community-manager/key.properties
+          echo "releaseKeyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> dlrg-community-manager/key.properties
+          echo "key.properties created successfully."
+        # WICHTIG: Stelle sicher, dass die Secret-Namen hier exakt mit deinen GitHub Secrets übereinstimmen.
 
       # 🔹 App Bundle für Google Play Store erstellen
-      - name: Build App Bundle
+      - name: Build Release App Bundle
         run: flutter build appbundle --release
-        working-directory: dlrg_weeze_manager
+        working-directory: dlrg-community-manager # Sicherstellen, dass im Projektordner ausgeführt wird
 
       # 🔹 App Bundle als Artifact hochladen
-      - name: Upload App Bundle
-        uses: actions/upload-artifact@v4
+      - name: Upload App Bundle Artifact
+        uses: actions/upload-artifact@v4 # Neueste Version verwenden
         with:
-          name: DLRG Community Manager.aab
-          path: dlrg_weeze_manager/build/app/outputs/bundle/release/app-release.aab
+          name: DLRG-Community-Manager-Release # Artefaktname ohne Leerzeichen ist oft besser
+          # Pfad relativ zum Workspace-Root
+          path: dlrg-community-manager/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error # Fehler werfen, wenn Bundle nicht gefunden wird
+          retention-days: 7 # Wie lange das Artefakt gespeichert werden soll (optional)
