@@ -1,0 +1,2 @@
+D:/Projekte/dlrg_weeze_manager/android/app/.cxx/Debug/3b1x4b22/x86_64/CMakeFiles/edit_cache.dir
+D:/Projekte/dlrg_weeze_manager/android/app/.cxx/Debug/3b1x4b22/x86_64/CMakeFiles/rebuild_cache.dir

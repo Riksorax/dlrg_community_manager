@@ -1,8 +1,9 @@
-name: Build Flutter APK
+name: Build Flutter Debug APK
+
 on:
   push:
     branches:
-      - develop
+      - develop # Trigger für develop branch beibehalten
   pull_request:
     branches:
       - develop
@@ -10,30 +11,45 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: develop # Die Umgebung, die verwendet werden soll.
+    # environment: develop # Umgebung wird für Debug meist nicht benötigt, kann aber bleiben
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      - uses: actions/setup-java@v3
+        uses: actions/checkout@v4 # Neueste Version verwenden
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4'
-      - name: Change directory to project root
-        run: cd dlrg_weeze_manager && flutter pub get  # <-- Korrigiert: run verwendet
-      #- name: Install dependencies
-       # run: flutter pub get
+          # Verwende ggf. denselben Channel/Version wie im Release-Workflow für Konsistenz
+          channel: 'stable'
+          # flutter-version: '3.27.4'
+
+      # Schritt für 'pub get' direkt im Root ausführen
+      - name: Get Flutter dependencies
+        run: flutter pub get
+        # Kein 'cd' oder 'working-directory' nötig
+
+      # Schritt für 'doctor' direkt im Root ausführen
       - name: Check Flutter Doctor
         run: flutter doctor -v
-      - name: Build APK
+        # Kein 'working-directory' nötig
+
+      # Schritt für 'Build APK' direkt im Root ausführen
+      - name: Build Debug APK
         run: flutter build apk --debug
-        working-directory: dlrg_weeze_manager
-      - name: Upload APK
+        # Kein 'working-directory' nötig
+
+      # Upload Schritt mit korrektem Pfad
+      - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLRG Community Manager.apk
-          path: dlrg_weeze_manager/build/app/outputs/flutter-apk/app-debug.apk
-
+          name: DLRG-Community-Manager-Debug.apk # Name angepasst für Klarheit
+          # Pfad ohne das Unterverzeichnis-Präfix
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          if-no-files-found: error # Gut, um sicherzustellen, dass die APK gebaut wurde
