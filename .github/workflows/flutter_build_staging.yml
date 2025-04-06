@@ -11,65 +11,63 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Umgebung kann beibehalten werden, wenn Secrets dort definiert sind
-    # environment: staging
+    # environment: staging # Beibehalten, falls Secrets hier definiert sind
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Neueste Version verwenden
+        uses: actions/checkout@v4
 
       - name: Set up Java
-        uses: actions/setup-java@v4 # Neueste Version verwenden
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17' # Sicherstellen, dass dies für Android Gradle Plugin passt
+          java-version: '17'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable' # Empfohlen: stabilen Channel verwenden oder spezifische Version wie zuvor
-          # flutter-version: '3.27.4' # Oder deine bevorzugte Flutter-Version
+          channel: 'stable'
 
-      - name: Change directory to project root and get dependencies
-        # WICHTIG: Stelle sicher, dass 'dlrg-community-manager' der korrekte Name deines Flutter-Projektordners im Repo ist
-        run: cd dlrg-community-manager && flutter pub get
+      # Schritt für 'pub get' direkt im Root ausführen
+      - name: Get Flutter dependencies
+        run: flutter pub get
+        # Kein working-directory nötig, läuft im Root
 
+      # Schritt für 'doctor' direkt im Root ausführen
       - name: Check Flutter Doctor
-        # Führe doctor im Projektverzeichnis aus, um sicherzustellen, dass alles passt
         run: flutter doctor -v
-        working-directory: dlrg-community-manager
+        # Kein working-directory nötig
 
-      # 🔹 Release Keystore entschlüsseln und im Projekt-Root speichern
+      # 🔹 Release Keystore entschlüsseln und im Root speichern
       - name: Decode Release Keystore
         run: |
           echo "Decoding keystore..."
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > dlrg-community-manager/release.jks
+          # Schreibe direkt ins Root-Verzeichnis
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > release.jks
           echo "Keystore decoded successfully."
-        # WICHTIG: Ersetze ANDROID_KEYSTORE_BASE64 durch den exakten Namen deines Secrets, falls anders.
 
-      # 🔹 `key.properties` Datei im Projekt-Root erstellen (mit korrekten Property-Namen)
+      # 🔹 `key.properties` Datei im Root erstellen
       - name: Create key.properties for Release
         run: |
           echo "Creating key.properties..."
-          # Schreibe in das Projektverzeichnis (dlrg-community-manager)
-          echo "releaseStoreFile=release.jks" > dlrg-community-manager/key.properties
-          echo "releaseStorePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> dlrg-community-manager/key.properties
-          echo "releaseKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> dlrg-community-manager/key.properties
-          echo "releaseKeyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> dlrg-community-manager/key.properties
+          # Schreibe direkt ins Root-Verzeichnis
+          echo "releaseStoreFile=release.jks" > key.properties
+          echo "releaseStorePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> key.properties
+          echo "releaseKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> key.properties
+          echo "releaseKeyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> key.properties
           echo "key.properties created successfully."
-        # WICHTIG: Stelle sicher, dass die Secret-Namen hier exakt mit deinen GitHub Secrets übereinstimmen.
 
-      # 🔹 App Bundle für Google Play Store erstellen
+      # 🔹 App Bundle im Root erstellen
       - name: Build Release App Bundle
         run: flutter build appbundle --release
-        working-directory: dlrg-community-manager # Sicherstellen, dass im Projektordner ausgeführt wird
+        # Kein working-directory nötig
 
-      # 🔹 App Bundle als Artifact hochladen
+      # 🔹 App Bundle als Artifact hochladen (Pfad angepasst)
       - name: Upload App Bundle Artifact
-        uses: actions/upload-artifact@v4 # Neueste Version verwenden
+        uses: actions/upload-artifact@v4
         with:
-          name: DLRG-Community-Manager-Release # Artefaktname ohne Leerzeichen ist oft besser
-          # Pfad relativ zum Workspace-Root
-          path: dlrg-community-manager/build/app/outputs/bundle/release/app-release.aab
-          if-no-files-found: error # Fehler werfen, wenn Bundle nicht gefunden wird
-          retention-days: 7 # Wie lange das Artefakt gespeichert werden soll (optional)
+          name: DLRG-Community-Manager-Release
+          # Pfad ohne das Unterverzeichnis
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
