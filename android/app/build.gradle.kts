@@ -42,10 +42,23 @@ android {
 
     signingConfigs {
         getByName("debug").apply {
-            storeFile = file("C:/Users/Frank/.android/debug.keystore")
-            storePassword = "Riksorax.04?07!1993"
-            keyPassword = "Riksorax.04?07!1993"
-            keyAlias = "debug"
+            // Prüfen, ob wir uns in einer CI-Umgebung befinden (z.B. GitHub Actions)
+            // Wenn NICHT in CI, verwende die lokale Konfiguration.
+            // Wenn in CI, wird die Standard-Debug-Signierung verwendet.
+            val isCI = System.getenv().containsKey("CI") || System.getenv().containsKey("GITHUB_ACTIONS")
+
+            if (!isCI) {
+                // Diese Konfiguration wird NUR angewendet, wenn NICHT in CI.
+                // Beachte: Das direkte Speichern von Passwörtern im Code ist unsicher!
+                // Für lokale Entwicklung mag das akzeptabel sein, aber sei dir des Risikos bewusst.
+                storeFile = file("C:/Users/Frank/.android/debug.keystore")
+                storePassword = "Riksorax.04?07!1993" // <-- Unsicher im Code!
+                keyPassword = "Riksorax.04?07!1993" // <-- Unsicher im Code!
+                keyAlias = "debug" // Dieser Alias ist wahrscheinlich in Ordnung
+            }
+            // Wenn isCI true ist, werden storeFile, storePassword und keyPassword nicht gesetzt,
+            // und Gradle verwendet die Standard-Debug-Signierung des Android SDK, die auf dem Runner verfügbar ist.
+            // Der keyAlias 'debug' wird in der Regel auch standardmäßig verwendet, falls nötig, kann man ihn hier auch bedingt setzen.
         }
 
         create("release").apply {
