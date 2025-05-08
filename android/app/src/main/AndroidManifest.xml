@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="app.dlrg_cm.dlrgcommunitymanager">
     <application
         android:label="DLRG Community Manager"
         android:name="${applicationName}"
