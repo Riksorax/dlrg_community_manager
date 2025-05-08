@@ -43,24 +43,50 @@ jobs:
         run: |
           echo "Decoding keystore..."
           # Schreibe direkt ins Root-Verzeichnis
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > release-key.jks
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > release.jks
           echo "Keystore decoded successfully."
+          echo "Keystore file created at $(pwd)/release.jks" # Debug-Ausgabe
+          ls -lah release.jks # Debug-Ausgabe
 
       # 🔹 `key.properties` Datei im Root erstellen
-      - name: Create key.properties for Release
+      #- name: Create key.properties for Release
+      #  run: |
+      #    echo "Creating key.properties..."
+      #    # Schreibe direkt ins Root-Verzeichnis
+      #    echo "releaseStoreFile=release-key.jks" > key.properties
+      #   echo "releaseStorePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> key.properties
+      #    echo "releaseKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> key.properties
+      #    echo "releaseKeyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> key.properties
+      #    echo "key.properties created successfully."
+
+      # 🔹 App Bundle im Root erstellen - jetzt mit Secrets als Environment Variables
+      - name: Build Release App Bundle with Direct Credentials
+        # Führe diesen Schritt nur auf dem main Branch aus (oder wie gewünscht)
+        #if: contains(github.ref, 'main')
+        env:
+          # Mappe deine Secrets zu den Gradle Environment Variables
+          # ORG_GRADLE_PROJECT_... wird von Gradle gelesen
+          # ACHTUNG: Der Pfad zum Keystore (releaseStoreFile) muss relativ zum Android-Modul sein
+          # Da release.jks im Projekt-Root liegt und das Android-Modul unter 'android/',
+          # ist der relative Pfad dorthin '../release.jks'.
+          ORG_GRADLE_PROJECT_android.signing.storeFile: ../release.jks
+          ORG_GRADLE_PROJECT_android.signing.storePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_android.signing.keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_android.signing.keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+
+          # Optional: Mappe deine anderen Secrets, falls der Build sie braucht (z.B. API_KEY)
+          # API_KEY: ${{ secrets.API_KEY }}
+
         run: |
-          echo "Creating key.properties..."
-          # Schreibe direkt ins Root-Verzeichnis
-          echo "releaseStoreFile=release-key.jks" > key.properties
-          echo "releaseStorePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> key.properties
-          echo "releaseKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> key.properties
-          echo "releaseKeyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> key.properties
-          echo "key.properties created successfully."
+          echo "Starting release appbundle build using direct credentials..."
+          # Der flutter build Befehl triggert den Gradle Build, der die Environment Variables aufnimmt
+          flutter build appbundle --release
+          echo "Build command finished."
 
       # 🔹 App Bundle im Root erstellen
-      - name: Build Release App Bundle
-        run: flutter build appbundle --release
-        # Kein working-directory nötig
+      #- name: Build Release App Bundle
+      #  run: flutter build appbundle --release
+      #  # Kein working-directory nötig
 
       # 🔹 App Bundle als Artifact hochladen (Pfad angepasst)
       - name: Upload App Bundle Artifact
