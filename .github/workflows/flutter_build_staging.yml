@@ -51,7 +51,7 @@ jobs:
           echo "Decoding keystore for release build..."
           # Dekodiere den Secret-Inhalt und schreibe ihn ins Projekt-Root
           # Der Dateiname release.jks wird später im Build-Schritt über ENV_VAR verwendet.
-          echo $KEYSTORE_BASE64_SECRET | base64 --decode > release.jks
+          echo $ANDROID_KEYSTORE_BASE64 | base64 --decode > release.jks
           echo "Keystore decoded successfully."
           echo "Keystore file created at $(pwd)/release.jks" # Debug-Ausgabe
           ls -lah release.jks # Debug-Ausgabe zur Überprüfung
