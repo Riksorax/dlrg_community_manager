@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "Decoding keystore..."
           # Schreibe direkt ins Root-Verzeichnis
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > upload-keystore.jks
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > release-key.jks
           echo "Keystore decoded successfully."
 
       # 🔹 `key.properties` Datei im Root erstellen
@@ -51,7 +51,7 @@ jobs:
         run: |
           echo "Creating key.properties..."
           # Schreibe direkt ins Root-Verzeichnis
-          echo "releaseStoreFile=release.jks" > key.properties
+          echo "releaseStoreFile=release-key.jks" > key.properties
           echo "releaseStorePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> key.properties
           echo "releaseKeyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> key.properties
           echo "releaseKeyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> key.properties
