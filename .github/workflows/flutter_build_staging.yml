@@ -98,7 +98,7 @@ jobs:
           # um die signingConfig zu konfigurieren/überschreiben.
           # ACHTUNG: Der Pfad zum Keystore muss relativ zum Android-Modul sein (android/).
           # Da release.jks im Projekt-Root liegt, ist der relative Pfad '../release.jks'.
-          ORG_GRADLE_PROJECT_android.signing.storeFile: ../release.jks
+          ORG_GRADLE_PROJECT_android.signing.storeFile: release.jks
           ORG_GRADLE_PROJECT_android.signing.storePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }} # Secret für Store Password
           ORG_GRADLE_PROJECT_android.signing.keyAlias: ${{ secrets.ANDROID_KEY_ALIAS }}           # Secret für Key Alias
           ORG_GRADLE_PROJECT_android.signing.keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}           # Secret für Key Password
