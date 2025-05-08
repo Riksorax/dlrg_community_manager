@@ -67,13 +67,13 @@ android {
                 storePassword = keystoreProperties["releaseStorePassword"] as String
                 keyAlias = keystoreProperties["releaseKeyAlias"] as String
                 keyPassword = keystoreProperties["releaseKeyPassword"] as String
-            } else if (System.getenv("android.signing.storeFile") != null) {
-                println("No key.properties found. Using environment variables for signing config.")
-        
-                storeFile = file(System.getenv("android.signing.storeFile"))
-                storePassword = System.getenv("android.signing.storePassword")
-                keyAlias = System.getenv("android.signing.keyAlias")
-                keyPassword = System.getenv("android.signing.keyPassword")
+            } else if (project.hasProperty("android.signing.storeFile")) {
+                println("No key.properties found. Using Gradle project properties for signing config.")
+            
+                storeFile = project.findProperty("android.signing.storeFile")?.let { file(it as String) }
+                storePassword = project.findProperty("android.signing.storePassword") as? String
+                keyAlias = project.findProperty("android.signing.keyAlias") as? String
+                keyPassword = project.findProperty("android.signing.keyPassword") as? String
             } else {
                 println("Warning: No signing config provided! Release build will likely fail.")
             }
