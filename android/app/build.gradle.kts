@@ -62,18 +62,23 @@ android {
         }
 
         create("release").apply {
-            // Lese Konfiguration aus key.properties, nur wenn die Datei existiert und die Eigenschaft vorhanden ist
             if (keystoreProperties.containsKey("releaseStoreFile")) {
                 storeFile = file(keystoreProperties["releaseStoreFile"] as String)
                 storePassword = keystoreProperties["releaseStorePassword"] as String
                 keyAlias = keystoreProperties["releaseKeyAlias"] as String
                 keyPassword = keystoreProperties["releaseKeyPassword"] as String
+            } else if (System.getenv("android.signing.storeFile") != null) {
+                println("No key.properties found. Using environment variables for signing config.")
+        
+                storeFile = file(System.getenv("android.signing.storeFile"))
+                storePassword = System.getenv("android.signing.storePassword")
+                keyAlias = System.getenv("android.signing.keyAlias")
+                keyPassword = System.getenv("android.signing.keyPassword")
             } else {
-                println("Warning: Release signing properties not found in key.properties! Release build may not be signed correctly.")
-                // Optional: Setze hier Dummy-Werte oder wirf einen Fehler, wenn Release-Signing zwingend ist
-                // throw GradleException("Release signing properties not found in key.properties")
+                println("Warning: No signing config provided! Release build will likely fail.")
             }
         }
+
     }
 
     defaultConfig {
