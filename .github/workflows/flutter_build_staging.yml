@@ -76,6 +76,10 @@ jobs:
           # Optional: Zeige die ersten paar Bytes zur visuellen Prüfung (KEINE PASSWÖRTER!)
           # head -c 20 release.jks | hexdump -C
 
+      # 🔹 Keystore in das erwartete Android-Verzeichnis verschieben
+      - name: Move Keystore to android/app directory
+        run: mv release.jks android/app/release.jks
+
       # 🔹 `key.properties` Datei im Root erstellen
       #- name: Create key.properties for Release
       #  run: |
