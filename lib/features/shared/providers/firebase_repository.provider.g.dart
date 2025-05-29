@@ -565,7 +565,7 @@ class _DeleteMemberRepoProviderElement
   String get memberNumber => (origin as DeleteMemberRepoProvider).memberNumber;
 }
 
-String _$getAllMembersRepoHash() => r'8c60677a23997227f05383a008c8f163c2fd150b';
+String _$getAllMembersRepoHash() => r'dafa8696eefbbc9e3e03a622896b81848cfb4583';
 
 /// See also [getAllMembersRepo].
 @ProviderFor(getAllMembersRepo)
@@ -988,6 +988,137 @@ class _UpdateAuthProviderElement extends AutoDisposeFutureProviderElement<bool>
 
   @override
   Auth get auth => (origin as UpdateAuthProvider).auth;
+}
+
+String _$searchMemberHash() => r'00165c4538f2a03cb7ea1f950f3011ee74e0b4b3';
+
+/// See also [searchMember].
+@ProviderFor(searchMember)
+const searchMemberProvider = SearchMemberFamily();
+
+/// See also [searchMember].
+class SearchMemberFamily extends Family<AsyncValue<List<Member>>> {
+  /// See also [searchMember].
+  const SearchMemberFamily();
+
+  /// See also [searchMember].
+  SearchMemberProvider call(
+    String searchText,
+  ) {
+    return SearchMemberProvider(
+      searchText,
+    );
+  }
+
+  @override
+  SearchMemberProvider getProviderOverride(
+    covariant SearchMemberProvider provider,
+  ) {
+    return call(
+      provider.searchText,
+    );
+  }
+
+  static const Iterable<ProviderOrFamily>? _dependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
+
+  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
+
+  @override
+  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
+      _allTransitiveDependencies;
+
+  @override
+  String? get name => r'searchMemberProvider';
+}
+
+/// See also [searchMember].
+class SearchMemberProvider extends AutoDisposeFutureProvider<List<Member>> {
+  /// See also [searchMember].
+  SearchMemberProvider(
+    String searchText,
+  ) : this._internal(
+          (ref) => searchMember(
+            ref as SearchMemberRef,
+            searchText,
+          ),
+          from: searchMemberProvider,
+          name: r'searchMemberProvider',
+          debugGetCreateSourceHash:
+              const bool.fromEnvironment('dart.vm.product')
+                  ? null
+                  : _$searchMemberHash,
+          dependencies: SearchMemberFamily._dependencies,
+          allTransitiveDependencies:
+              SearchMemberFamily._allTransitiveDependencies,
+          searchText: searchText,
+        );
+
+  SearchMemberProvider._internal(
+    super._createNotifier, {
+    required super.name,
+    required super.dependencies,
+    required super.allTransitiveDependencies,
+    required super.debugGetCreateSourceHash,
+    required super.from,
+    required this.searchText,
+  }) : super.internal();
+
+  final String searchText;
+
+  @override
+  Override overrideWith(
+    FutureOr<List<Member>> Function(SearchMemberRef provider) create,
+  ) {
+    return ProviderOverride(
+      origin: this,
+      override: SearchMemberProvider._internal(
+        (ref) => create(ref as SearchMemberRef),
+        from: from,
+        name: null,
+        dependencies: null,
+        allTransitiveDependencies: null,
+        debugGetCreateSourceHash: null,
+        searchText: searchText,
+      ),
+    );
+  }
+
+  @override
+  AutoDisposeFutureProviderElement<List<Member>> createElement() {
+    return _SearchMemberProviderElement(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is SearchMemberProvider && other.searchText == searchText;
+  }
+
+  @override
+  int get hashCode {
+    var hash = _SystemHash.combine(0, runtimeType.hashCode);
+    hash = _SystemHash.combine(hash, searchText.hashCode);
+
+    return _SystemHash.finish(hash);
+  }
+}
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+mixin SearchMemberRef on AutoDisposeFutureProviderRef<List<Member>> {
+  /// The parameter `searchText` of this provider.
+  String get searchText;
+}
+
+class _SearchMemberProviderElement
+    extends AutoDisposeFutureProviderElement<List<Member>>
+    with SearchMemberRef {
+  _SearchMemberProviderElement(super.provider);
+
+  @override
+  String get searchText => (origin as SearchMemberProvider).searchText;
 }
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

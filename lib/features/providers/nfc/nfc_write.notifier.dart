@@ -51,8 +51,7 @@ class NfcWriteNotifier extends _$NfcWriteNotifier {
               try {
                 await ndef.write(message);
 
-                //TODO Schreibschutz erst mal aus, abklären oder den angemacht werden soll
-                //await ndef.writeLock();
+                await ndef.writeLock();
 
                 state = true;
                 await NfcManager.instance.stopSession(alertMessage: 'Erfolgreich!');

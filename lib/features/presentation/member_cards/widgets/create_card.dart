@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 import '../../../providers/excel_import/excel_import.notifier.dart';
-import '../../../providers/nfc/nfc_read.notifier.dart';
 import '../../../providers/nfc/nfc_write.notifier.dart';
 import '../../../providers/pdf_template/pdf_template.notifier.dart';
 import '../../../providers/printer/print_pdf_template.notifier.dart';
@@ -74,7 +73,7 @@ class _CreateCardState extends ConsumerState<CreateCard> {
                     icon: const Icon(Icons.nfc),
                   ),
                   TextButton.icon(
-                    onPressed: !nfcWriteState
+                    onPressed: nfcWriteState
                         ? () {
                             ref
                                 .watch(updateMemberNotifierProvider.notifier)

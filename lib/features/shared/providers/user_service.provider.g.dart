@@ -7,7 +7,7 @@ part of 'user_service.provider.dart';
 // **************************************************************************
 
 String _$userServiceNotifierHash() =>
-    r'1532efd466046d7312d34d219b03a832d65939be';
+    r'db7ef50dff96a03e76b26495a0e7832771a3c092';
 
 /// See also [UserServiceNotifier].
 @ProviderFor(UserServiceNotifier)

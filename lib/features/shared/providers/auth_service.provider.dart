@@ -50,7 +50,7 @@ class AuthServiceNotifier extends _$AuthServiceNotifier {
       state = AsyncData(userCredential.user); // Korrekt: Setze den Zustand auf Data
       return userCredential.user;
     } catch (e, st) {
-      state = AsyncError(e, st); // Korrekt: Setze den Zustand auf Error
+      state = AsyncError("Account muss noch bestätigt werden.", st); // Korrekt: Setze den Zustand auf Error
       print(e);
       return null;
     }
