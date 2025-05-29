@@ -267,3 +267,31 @@ Future<bool> updateAuth(Ref ref, Auth auth) async {
     return false;
   }
 }
+
+@riverpod
+Future<List<Member>> searchMember (Ref ref, String searchText) async {
+  try {
+    // Rufe alle Mitglieder über den bestehenden Provider ab
+    final allMembers = await ref.watch(getAllMembersRepoProvider.future);
+
+    if (searchText.isEmpty) {
+      // Wenn der Suchtext leer ist, gib alle Mitglieder zurück
+      return allMembers;
+    }
+
+    final lowerCaseSearchText = searchText.toLowerCase();
+
+    // Filtere die Liste basierend auf dem Suchtext
+    final filteredMembers = allMembers.where((member) {
+      // Hier definierst du die Suchkriterien.
+      // Du kannst mehrere Felder überprüfen.
+      return member.firstname.toLowerCase().contains(lowerCaseSearchText) ||
+          member.lastname.toLowerCase().contains(lowerCaseSearchText); // Beispiel für ein weiteres Feld
+    }).toList();
+
+    return filteredMembers;
+  } catch (e) {
+    print("Fehler beim Suchen der Mitglieder: $e");
+    return [];
+  }
+}

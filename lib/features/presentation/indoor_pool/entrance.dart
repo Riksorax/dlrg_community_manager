@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../providers/entrance/entrance.notifier.dart';
+import '../../providers/entrance/search_member.notifier.dart';
 import '../../providers/nfc/nfc_read.notifier.dart';
-import '../../providers/nfc/nfc_write.notifier.dart';
 import '../../shared/presentation/widgets/base_scaffold.dart';
-import '../../shared/providers/firebase_repository.provider.dart';
+import '../member_cards/widgets/member_list_widget.dart';
 
 class Entrance extends ConsumerStatefulWidget {
   const Entrance({super.key});
@@ -17,6 +17,20 @@ class Entrance extends ConsumerStatefulWidget {
 }
 
 class _EntranceState extends ConsumerState<Entrance> {
+  late SearchController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = SearchController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).size;
@@ -24,23 +38,23 @@ class _EntranceState extends ConsumerState<Entrance> {
     late String saturday;
 
     String calcNextSaturday() {
-      DateTime jetzt = DateTime.now();
-      DateTime naechsterSamstag;
+      DateTime now = DateTime.now();
+      DateTime nextSaturday;
 
-      if (jetzt.weekday == DateTime.saturday) {
-        naechsterSamstag = jetzt;
+      if (now.weekday == DateTime.saturday) {
+        nextSaturday = now;
       } else {
         // Berechne die Tage bis zum nächsten Samstag
-        int tageBisSamstag = DateTime.saturday - jetzt.weekday;
-        if (tageBisSamstag < 0) {
-          tageBisSamstag += 7; // Wenn wir schon über Samstag hinaus sind
+        int daysToSaturday = DateTime.saturday - now.weekday;
+        if (daysToSaturday < 0) {
+          daysToSaturday += 7; // Wenn wir schon über Samstag hinaus sind
         }
-        naechsterSamstag = jetzt.add(Duration(days: tageBisSamstag));
+        nextSaturday = now.add(Duration(days: daysToSaturday));
       }
 
       // Formatiere das Datum nach Wunsch
       DateFormat formatter = DateFormat('dd.MM.yyyy');
-      return saturday = formatter.format(naechsterSamstag);
+      return saturday = formatter.format(nextSaturday);
     }
 
     saturday = calcNextSaturday();
@@ -49,7 +63,6 @@ class _EntranceState extends ConsumerState<Entrance> {
     var memberList = ref.watch(entranceNotifierProvider);
 
     clickPayed(String memberNumber, bool? value, int index) {
-      print(memberNumber);
       ref
           .read(entranceNotifierProvider.notifier)
           .updateMember(memberNumber, value!, index);
@@ -60,13 +73,61 @@ class _EntranceState extends ConsumerState<Entrance> {
       body: Container(
         margin: const EdgeInsets.all(24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
+            SearchAnchor.bar(
+              // SearchBar-Eigenschaften werden direkt hier übergeben:
+              isFullScreen: false,
+              searchController: _searchController,
+              barHintText: "Suche nach Mitglied",
+              barLeading: const Icon(Icons.search),
+              barTrailing: [
+                IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    ref.read(searchTextNotifierProvider.notifier).setText("");
+                  },
+                ),
+              ],
+              // Die Eigenschaft, die auf Textänderungen reagiert, heißt hier 'onChanged'.
+              // Sie entspricht funktional dem 'viewOnChanged' des Standard-Konstruktors.
+              onChanged: (text) {
+                ref.read(searchTextNotifierProvider.notifier).setText(text);
+              },
+              // Der suggestionsBuilder bleibt genau gleich. Er ist für die Ergebnisliste zuständig.
+              suggestionsBuilder: (BuildContext context, SearchController controller) {
+                final asyncMembers = ref.watch(searchMemberNotifierAsyncProvider);
+
+                return asyncMembers.when(
+                  data: (members) {
+                    if (controller.text.isEmpty && members.isEmpty) {
+                      return [const Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text("Tippe um nach Mitgliedern zu suchen.")))];
+                    }
+                    if (members.isEmpty) {
+                      return [Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text("Keine Ergebnisse für '${controller.text}'.")))];
+                    }
+                    return members.map((member) {
+                      return ListTile(
+                        title: Text("${member.firstname} ${member.lastname}"),
+                        onTap: () {
+                          controller.closeView("${member.firstname} ${member.lastname}");
+                          ref.read(nfcReadNotifierProvider.notifier).loadUpdateMember(member.memberNumber);
+                          ref.read(searchTextNotifierProvider.notifier).setText("");
+                          _searchController.clear();
+                          FocusScope.of(context).unfocus();
+                        },
+                      );
+                    }).toList();
+                  },
+                  loading: () => [const Center(child: Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()))],
+                  error: (err, stack) => [Center(child: Padding(padding: EdgeInsets.all(16.0), child: Text('Fehler beim Suchen: $err')))],
+                );
+              },
+            ),
             Flexible(
               fit: FlexFit.loose,
               child: Card(
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
                   children: [
                     ListTile(
                       leading: const Icon(Icons.nfc),
@@ -75,94 +136,19 @@ class _EntranceState extends ConsumerState<Entrance> {
                       subtitle: Text(saturday),
                     ),
                     Expanded(
-                      child: ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: memberList.length,
-                        itemBuilder: (context, index) {
-                          var firstName =
-                              memberList[index].firstname.toString();
-                          var lastName = memberList[index].lastname.toString();
-                          var birthDay = DateTime.parse(
-                              memberList[index].birthday.toString());
-                          var memberNo =
-                              memberList[index].memberNumber.toString();
-                          var memberCardDone = memberList[index].memberCheckIn;
-                          return SizedBox(
-                            height: deviceSize.height / 1.4,
-                            child: ListTile(
-                              trailing: SizedBox(
-                                width: 125,
-                                child: Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    ...memberCardDone.asMap().entries.map(
-                                      (entry) {
-                                        int index = entry.key;
-                                        var element = entry.value;
-                                        var checkDate = DateFormat("dd.MM.yyyy")
-                                            .format(element.checkInDate);
-                                        return element.checkIn
-                                            ? Expanded(
-                                                child: Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: Column(
-                                                        children: [
-                                                          Flexible(
-                                                              child: Text(
-                                                                  checkDate)),
-                                                          Flexible(
-                                                            child: Checkbox(
-                                                              value: element
-                                                                  .checkIn,
-                                                              onChanged: null,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: Column(
-                                                        children: [
-                                                          const Flexible(
-                                                              child: Text(
-                                                                  "Bezahlt")),
-                                                          Flexible(
-                                                            child: Checkbox(
-                                                              value:
-                                                                  element.payed,
-                                                              onChanged: element
-                                                                      .payed
-                                                                  ? null
-                                                                  : (value) => clickPayed(
-                                                                  memberNo,
-                                                                      value,
-                                                                      index),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              )
-                                            : const SizedBox();
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              title: Text("$firstName $lastName"),
-                              subtitle: Text(
-                                DateFormat("dd.MM.yyyy").format(birthDay),
-                              ),
-                            ),
-                          );
+                      child: RefreshIndicator(
+                        onRefresh: () async {
+                          memberList = ref.read(entranceNotifierProvider);
+                          await Future.delayed(const Duration(milliseconds: 50));
                         },
+                        child: MemberListWidget(
+                          memberList: memberList,
+                          deviceSize: deviceSize,
+                          onPayedClicked: (memberNo, value, index) =>
+                              clickPayed(memberNo, value, index),
+                        ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -174,3 +160,5 @@ class _EntranceState extends ConsumerState<Entrance> {
     );
   }
 }
+
+
