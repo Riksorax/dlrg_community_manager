@@ -351,3 +351,47 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # End of https://www.toptal.com/developers/gitignore/api/rider,aspnetcore
+
+#################################################################################
+### Flutter ###
+#################################################################################
+
+# Flutter/Dart/Pub-generierte Dateien
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.dart_tool/
+
+# Build-Artefakte
+build/
+
+# Platform-spezifische generierte Dateien
+/ios/Pods/
+/ios/Podfile.lock
+/ios/.symlinks/
+/android/.gradle/
+
+# Von Desktop-Builds generierte temporäre Dateien
+/windows/flutter/ephemeral
+/linux/flutter/ephemeral
+/macos/Flutter/ephemeral
+
+# IDE Moduldateien (deckt .iml Dateien aus Android Studio ab)
+*.iml
+
+# Log-Dateien
+flutter_*.log
+app_crashes/
+
+# 🛑 WICHTIG: Sensible Schlüsseldateien NIEMALS versionieren!
+# Diese Dateien müssen sicher und außerhalb des Repositories verwahrt werden.
+*.jks
+*.jks.old
+*.keystore
+*.pem
+
+# Oft wird empfohlen, Konfigurationsdateien mit sensiblen Schlüsseln
+# ebenfalls nicht zu versionieren, wenn sie nicht für alle Entwickler gleich sind.
+# /android/app/google-services.json
+# /ios/Runner/GoogleService-Info.plist
